@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Voting Lomba Menggambar Pesta Gotilon 2025</title>
+  <style>
+    /* Terracotta palette and modern style */
+    :root {
+      --terracotta-light: #f4e1d2;
+      --terracotta-main: #e07a5f;
+      --terracotta-dark: #3d2c29;
+      --terracotta-accent: #f2cc8f;
+      --terracotta-muted: #c07b68;
+      --background: var(--terracotta-light);
+      --text-dark: #3d2c29;
+      --text-light: #ffffff;
+      --error-color: #d64161;
+      --success-color: #4caf50;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .container {
+      max-width: 420px;
+      width: 100%;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(224, 122, 95, 0.3);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    h1 {
+      text-align: center;
+      color: var(--terracotta-dark);
+      margin-bottom: 0.5rem;
+    }
+    section {
+      border: 2px solid var(--terracotta-main);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      background: var(--terracotta-light);
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--terracotta-dark);
+    }
+    input[type="text"], 
+    input[type="password"], 
+    select {
+      width: 100%;
+      padding: 0.5rem 0.7rem;
+      border: 2px solid var(--terracotta-main);
+      border-radius: 6px;
+      font-size: 1rem;
+      outline-color: var(--terracotta-main);
+    }
+    button {
+      margin-top: 1rem;
+      background-color: var(--terracotta-main);
+      border: none;
+      color: var(--text-light);
+      padding: 0.6rem 1.2rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      width: 100%;
+    }
+    button:hover:enabled {
+      background-color: var(--terracotta-dark);
+    }
+    button:disabled {
+      background-color: var(--terracotta-muted);
+      cursor: not-allowed;
+    }
+    .message {
+      margin-top: 0.8rem;
+      font-weight: 600;
+    }
+    .error {
+      color: var(--error-color);
+    }
+    .success {
+      color: var(--success-color);
+    }
+    .vote-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+      justify-content: center;
+    }
+    .vote-option {
+      background-color: var(--terracotta-main);
+      color: var(--text-light);
+      font-weight: 700;
+      padding: 0.7rem 1rem;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      border: 2px solid transparent;
+    }
+    .vote-option.selected {
+      background-color: var(--terracotta-dark);
+      border-color: var(--terracotta-accent);
+    }
+    .votes-display {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-weight: 600;
+      color: var(--terracotta-dark);
+    }
+    .votes-display div {
+      background: var(--terracotta-accent);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      color: var(--terracotta-dark);
+    }
+    /* Admin section styling */
+    #admin-section {
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-label="Voting Lomba Menggambar Pesta Gotilon 2025">
+    <h1>Voting Lomba Menggambar Pesta Gotilon 2025</h1>
+    
+    <!-- Respondent Section -->
+    <section id="respondent-section" aria-label="Bagian Responden">
+      <label for="token-input">Masukkan Token Anda:</label>
+      <input type="text" id="token-input" autocomplete="off" placeholder="Token Anda" aria-describedby="token-message" />
+      <button id="token-validate-btn">Mulai Voting</button>
+      <div id="token-message" class="message" role="alert" aria-live="polite"></div>
+      
+      <form id="vote-form" style="display:none;" aria-label="Form Voting Sektor">
+        <label>Pilih Sektor (1-7):</label>
+        <div class="vote-options" role="radiogroup" aria-labelledby="vote-label">
+          <!-- dynamically generated buttons -->
+        </div>
+        <button type="submit" disabled id="submit-vote-btn">Submit Vote</button>
+      </form>
+      <div id="vote-message" class="message" role="alert" aria-live="polite"></div>
+    </section>
+    
+    <!-- Admin Section -->
+    <section id="admin-section" aria-label="Bagian Admin">
+      <label for="admin-password">Admin Password:</label>
+      <input type="password" id="admin-password" autocomplete="off" placeholder="Password Admin" aria-describedby="admin-message" />
+      <button id="admin-login-btn">Login Admin</button>
+      <div id="admin-message" class="message" role="alert" aria-live="polite"></div>
+      
+      <div id="admin-panel" style="display:none;margin-top:1rem;">
+        <label for="new-token-input">Beri Token ke Peserta:</label>
+        <input type="text" id="new-token-input" autocomplete="off" placeholder="Token baru" aria-describedby="token-add-message" />
+        <button id="add-token-btn">Tambah Token</button>
+        <div id="token-add-message" class="message" role="alert" aria-live="polite"></div>
+        
+        <h3>Jumlah Voting per Sektor:</h3>
+        <div class="votes-display" aria-live="polite" id="votes-display">
+          <!-- Votes counter here -->
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function() {
+      const adminPassword = 'semutsektor3';
+
+      // Storage keys
+      const TOKENS_KEY = 'voting_tokens';
+      const USED_TOKENS_KEY = 'used_tokens';
+      const VOTES_KEY = 'sector_votes';
+
+      // DOM elements Respondent
+      const tokenInput = document.getElementById('token-input');
+      const tokenValidateBtn = document.getElementById('token-validate-btn');
+      const tokenMessage = document.getElementById('token-message');
+
+      const voteForm = document.getElementById('vote-form');
+      const voteOptionsContainer = voteForm.querySelector('.vote-options');
+      const submitVoteBtn = document.getElementById('submit-vote-btn');
+      const voteMessage = document.getElementById('vote-message');
+
+      // DOM elements Admin
+      const adminPasswordInput = document.getElementById('admin-password');
+      const adminLoginBtn = document.getElementById('admin-login-btn');
+      const adminMessage = document.getElementById('admin-message');
+
+      const adminPanel = document.getElementById('admin-panel');
+      const newTokenInput = document.getElementById('new-token-input');
+      const addTokenBtn = document.getElementById('add-token-btn');
+      const tokenAddMessage = document.getElementById('token-add-message');
+      const votesDisplay = document.getElementById('votes-display');
+
+      // Utility functions
+      function loadTokens() {
+        return JSON.parse(localStorage.getItem(TOKENS_KEY)) || [];
+      }
+      function saveTokens(tokens) {
+        localStorage.setItem(TOKENS_KEY, JSON.stringify(tokens));
+      }
+      function loadUsedTokens() {
+        return JSON.parse(localStorage.getItem(USED_TOKENS_KEY)) || [];
+      }
+      function saveUsedTokens(usedTokens) {
+        localStorage.setItem(USED_TOKENS_KEY, JSON.stringify(usedTokens));
+      }
+      function loadVotes() {
+        return JSON.parse(localStorage.getItem(VOTES_KEY)) || {1:0,2:0,3:0,4:0,5:0,6:0,7:0};
+      }
+      function saveVotes(votes) {
+        localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
+      }
+
+      // Admin login state
+      let adminLoggedIn = false;
+
+      // Respondent workflow variables
+      let currentToken = null;
+      let selectedSector = null;
+
+      // Initialize vote options buttons
+      function initVoteOptions() {
+        voteOptionsContainer.innerHTML = '';
+        for (let i = 1; i <= 7; i++) {
+          const btn = document.createElement('div');
+          btn.className = 'vote-option';
+          btn.textContent = i;
+          btn.tabIndex = 0;
+          btn.setAttribute('role', 'radio');
+          btn.setAttribute('aria-checked', 'false');
+          btn.setAttribute('data-sector', i);
+          btn.addEventListener('click', () => selectSector(i));
+          btn.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              selectSector(i);
+            }
+          });
+          voteOptionsContainer.appendChild(btn);
+        }
+        selectedSector = null;
+        updateVoteSubmitBtn();
+      }
+      function selectSector(sector) {
+        selectedSector = sector;
+        Array.from(voteOptionsContainer.children).forEach(btn => {
+          const btnSector = parseInt(btn.getAttribute('data-sector'));
+          const selected = btnSector === sector;
+          btn.classList.toggle('selected', selected);
+          btn.setAttribute('aria-checked', selected ? 'true' : 'false');
+        });
+        updateVoteSubmitBtn();
+      }
+      function updateVoteSubmitBtn() {
+        submitVoteBtn.disabled = selectedSector === null;
+      }
+
+      // Respondent token validation
+      tokenValidateBtn.addEventListener('click', () => {
+        const token = tokenInput.value.trim();
+        tokenMessage.textContent = '';
+        voteMessage.textContent = '';
+        if (!token) {
+          tokenMessage.textContent = 'Token tidak boleh kosong.';
+          tokenMessage.className = 'message error';
+          return;
+        }
+        const tokens = loadTokens();
+        if (!tokens.includes(token)) {
+          tokenMessage.textContent = 'Token tidak valid.';
+          tokenMessage.className = 'message error';
+          return;
+        }
+        const usedTokens = loadUsedTokens();
+        if (usedTokens.includes(token)) {
+          tokenMessage.textContent = 'Token sudah dipakai.';
+          tokenMessage.className = 'message error';
+          return;
+        }
+        currentToken = token;
+        tokenMessage.textContent = 'Token diterima, silakan pilih sektor untuk vote.';
+        tokenMessage.className = 'message success';
+        voteForm.style.display = 'block';
+        tokenInput.disabled = true;
+        tokenValidateBtn.disabled = true;
+        initVoteOptions();
+      });
+
+      // Submit vote handler
+      voteForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        voteMessage.textContent = '';
+        if (selectedSector === null) {
+          voteMessage.textContent = 'Pilih sektor terlebih dahulu.';
+          voteMessage.className = 'message error';
+          return;
+        }
+        // Mark token as used
+        const usedTokens = loadUsedTokens();
+        usedTokens.push(currentToken);
+        saveUsedTokens(usedTokens);
+
+        // Update votes
+        const votes = loadVotes();
+        votes[selectedSector] = (votes[selectedSector] || 0) + 1;
+        saveVotes(votes);
+
+        voteMessage.textContent = `Terima kasih telah memilih sektor ${selectedSector}!`;
+        voteMessage.className = 'message success';
+
+        // Disable voting after submit
+        disableVotingAfterSubmit();
+        // Refresh admin votes display if logged in
+        if (adminLoggedIn) {
+          renderVotesDisplay();
+        }
+      });
+
+      function disableVotingAfterSubmit() {
+        submitVoteBtn.disabled = true;
+        voteOptionsContainer.querySelectorAll('.vote-option').forEach(btn => {
+          btn.setAttribute('aria-disabled', 'true');
+          btn.style.cursor = 'default';
+        });
+      }
+
+      // Admin login process
+      adminLoginBtn.addEventListener('click', () => {
+        const pass = adminPasswordInput.value.trim();
+        adminMessage.textContent = '';
+        tokenAddMessage.textContent = '';
+        if (pass === adminPassword) {
+          adminLoggedIn = true;
+          adminMessage.textContent = 'Admin berhasil login.';
+          adminMessage.className = 'message success';
+          adminPanel.style.display = 'block';
+          adminPasswordInput.disabled = true;
+          adminLoginBtn.disabled = true;
+          renderVotesDisplay();
+        } else {
+          adminMessage.textContent = 'Password salah.';
+          adminMessage.className = 'message error';
+        }
+      });
+
+      // Admin add token handler
+      addTokenBtn.addEventListener('click', () => {
+        const newToken = newTokenInput.value.trim();
+        tokenAddMessage.textContent = '';
+        if (!newToken) {
+          tokenAddMessage.textContent = 'Token tidak boleh kosong.';
+          tokenAddMessage.className = 'message error';
+          return;
+        }
+        let tokens = loadTokens();
+        if (tokens.includes(newToken)) {
+          tokenAddMessage.textContent = 'Token sudah ada sebelumnya.';
+          tokenAddMessage.className = 'message error';
+          return;
+        }
+        tokens.push(newToken);
+        saveTokens(tokens);
+        tokenAddMessage.textContent = `Token "${newToken}" berhasil ditambahkan.`;
+        tokenAddMessage.className = 'message success';
+        newTokenInput.value = '';
+      });
+
+      // Render votes count for admin panel
+      function renderVotesDisplay() {
+        const votes = loadVotes();
+        votesDisplay.innerHTML = '';
+        for (let sector = 1; sector <= 7; sector++) {
+          const count = votes[sector] || 0;
+          const div = document.createElement('div');
+          div.textContent = `Sektor ${sector}: ${count} suara`;
+          votesDisplay.appendChild(div);
+        }
+      }
+
+      // Initialization
+      function init() {
+        voteForm.style.display = 'none';
+        tokenMessage.textContent = '';
+        voteMessage.textContent = '';
+        adminMessage.textContent = '';
+        tokenAddMessage.textContent = '';
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
+
